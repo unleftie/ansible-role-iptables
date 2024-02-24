@@ -8,28 +8,13 @@ service:
 {% endif %}
     enabled: true
     running: true
-{% if firewall_configure %}
-    skip: false
-{% else %}
-    skip: true
-{% endif %}
 command:
   iptables:
     exit-status: 0
     exec: "iptables -nL"
-{% if firewall_configure %}
-    skip: false
-{% else %}
-    skip: true
-{% endif %}
   ip6tables:
     exit-status: 0
     exec: "ip6tables -nL"
-{% if firewall_configure %}
-    skip: false
-{% else %}
-    skip: true
-{% endif %}
 file:
 {% if ansible_os_family == "RedHat" %}
   /etc/sysconfig/iptables:

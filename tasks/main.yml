@@ -1,0 +1,17 @@
+---
+- import_tasks: assert.yml
+  run_once: true
+  delegate_to: localhost
+
+- include_tasks: packages-Debian.yml
+  when: ansible_os_family == "Debian"
+
+- include_tasks: packages-RedHat.yml
+  when: ansible_os_family == "RedHat"
+
+- include_tasks: flush.yml
+  when: iptables_flush | bool
+
+- include_tasks: rules.yml
+
+- include_tasks: policies.yml

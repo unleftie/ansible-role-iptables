@@ -1,0 +1,20 @@
+---
+# flush all rules and policies
+iptables_flush: false
+
+iptables_dhcp_client_allow: true
+
+iptables_input_policy_drop: true
+iptables_forward_policy_drop: true
+
+iptables_ssh_port: 22
+
+# ipv4
+iptables_ipv4_nat: true
+iptables_ipv4_allow_internal: false
+iptables_ipv4_internal_ip_pool: "10.0.0.0/16"
+
+# ipv6
+iptables_ipv6_nat: false
+iptables_ipv6_allow_internal: false
+iptables_ipv6_internal_ip_pool: "fc00::/7"

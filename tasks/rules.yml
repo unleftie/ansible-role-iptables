@@ -1,0 +1,141 @@
+---
+- name: Set rules
+  notify: save_iptables_rules
+  block:
+    - name: Allow loopback interface for INPUT
+      iptables:
+        ip_version: "{{ item }}"
+        chain: INPUT
+        in_interface: lo
+        state: present
+        jump: ACCEPT
+        comment: "loopback interface"
+      loop: ["ipv4", "ipv6"]
+
+    - name: Allow loopback interface for OUTPUT
+      iptables:
+        ip_version: "{{ item }}"
+        chain: OUTPUT
+        out_interface: lo
+        state: present
+        jump: ACCEPT
+        comment: "loopback interface"
+      loop: ["ipv4", "ipv6"]
+
+    # quickly process packets for which we already have a connection
+    - name: Allow connections with ESTABLISHED and RELATED state
+      iptables:
+        ip_version: "{{ item.ip_version }}"
+        chain: "{{ item.chain }}"
+        state: present
+        ctstate: ESTABLISHED,RELATED
+        jump: ACCEPT
+        comment: "established and related state"
+      loop:
+        - { chain: "INPUT", ip_version: "ipv4" }
+        - { chain: "OUTPUT", ip_version: "ipv4" }
+        - { chain: "INPUT", ip_version: "ipv6" }
+        - { chain: "OUTPUT", ip_version: "ipv6" }
+
+    - name: Drop connections with INVALID state
+      iptables:
+        ip_version: "{{ item }}"
+        chain: INPUT
+        state: present
+        ctstate: INVALID
+        jump: DROP
+        comment: "invalid state"
+      loop: ["ipv4", "ipv6"]
+
+    - name: Allow dhcp client
+      iptables:
+        ip_version: "{{ item.ip_version }}"
+        chain: INPUT
+        state: present
+        source_port: "{{ item.source_port }}"
+        destination_port: "{{ item.destination_port }}"
+        protocol: udp
+        jump: ACCEPT
+        comment: "dhcp client"
+      loop:
+        - { source_port: 67, destination_port: 68, ip_version: "ipv4" }
+        - { source_port: 547, destination_port: 546, ip_version: "ipv6" }
+      when: iptables_dhcp_client_allow | bool
+
+    - name: Allow all internal connections (ipv4)
+      iptables:
+        ip_version: "ipv4"
+        chain: INPUT
+        state: present
+        source: "{{ iptables_ipv4_internal_ip_pool }}"
+        destination: "{{ iptables_ipv4_internal_ip_pool }}"
+        protocol: "all"
+        jump: ACCEPT
+        comment: "all internal connections"
+      when: iptables_ipv4_allow_internal | bool
+
+    - name: Allow all internal connections (ipv6)
+      iptables:
+        ip_version: "ipv6"
+        chain: INPUT
+        state: present
+        source: "{{ iptables_ipv6_internal_ip_pool }}"
+        destination: "{{ iptables_ipv6_internal_ip_pool }}"
+        protocol: "all"
+        jump: ACCEPT
+        comment: "all internal connections"
+      when: iptables_ipv6_allow_internal | bool
+
+    - name: Allow icmp from external (ipv4)
+      iptables:
+        ip_version: "ipv4"
+        chain: INPUT
+        state: present
+        protocol: icmp
+        icmp_type: "{{ item }}"
+        jump: ACCEPT
+        comment: "icmp type {{ item }}"
+      loop: [3, 8, 11, 12, 13]
+
+    - name: Allow icmp from external (ipv6)
+      iptables:
+        ip_version: "ipv6"
+        chain: INPUT
+        state: present
+        protocol: icmpv6
+        jump: ACCEPT
+        comment: "icmpv6"
+
+    - name: Allow ssh from all
+      iptables:
+        ip_version: "{{ item }}"
+        chain: INPUT
+        protocol: tcp
+        destination_port: "{{ iptables_ssh_port }}"
+        state: present
+        ctstate: NEW,ESTABLISHED
+        jump: ACCEPT
+        comment: "ssh from external"
+      loop: ["ipv4", "ipv6"]
+
+    - name: Allow NAT (ipv4)
+      iptables:
+        ip_version: "ipv4"
+        chain: POSTROUTING
+        table: nat
+        out_interface: "{{ ansible_default_ipv4.interface }}"
+        state: present
+        jump: MASQUERADE
+        comment: "default nat"
+      when: iptables_ipv4_nat | bool
+
+    - name: Allow NAT (ipv6)
+      iptables:
+        ip_version: "ipv6"
+        chain: POSTROUTING
+        table: nat
+        out_interface: "{{ ansible_default_ipv6.interface }}"
+        state: present
+        jump: MASQUERADE
+        comment: "default nat"
+      when: iptables_ipv6_nat | bool

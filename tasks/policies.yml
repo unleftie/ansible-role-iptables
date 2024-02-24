@@ -1,0 +1,19 @@
+---
+- name: Set policies
+  notify: save_iptables_rules
+  block:
+    - name: Set the policy for the INPUT chain to DROP
+      iptables:
+        ip_version: "{{ item }}"
+        chain: INPUT
+        policy: DROP
+      loop: ["ipv4", "ipv6"]
+      when: iptables_input_policy_drop | bool
+
+    - name: Set the policy for the FORWARD chain to DROP
+      iptables:
+        ip_version: "{{ item }}"
+        chain: FORWARD
+        policy: DROP
+      loop: ["ipv4", "ipv6"]
+      when: iptables_forward_policy_drop | bool

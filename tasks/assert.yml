@@ -1,0 +1,10 @@
+---
+- name: test if iptables_ssh_port is set correctly
+  assert:
+    that:
+      - iptables_ssh_port is defined
+      - iptables_ssh_port is number
+      - iptables_ssh_port >= 0
+      - iptables_ssh_port < 65536
+    fail_msg: "'iptables_ssh_port' must be between 0 and 65536"
+    quiet: true

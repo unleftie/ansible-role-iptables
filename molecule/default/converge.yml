@@ -4,8 +4,5 @@
   become: true
   tasks:
     - include_role:
-        name: "{{ lookup('env', 'ROLE_NAME') | default('ansible-role-linux', true) }}"
-      vars:
-        swap_configure: false
-        packages_upgrade_all: false
-        packages_extra: false
+        name: "{{ lookup('env', 'ROLE_NAME') | default('ansible-role-iptables', true) }}"
+

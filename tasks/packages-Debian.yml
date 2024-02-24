@@ -1,0 +1,38 @@
+---
+- name: Ensure apt cache and packages are updated
+  apt:
+    update_cache: true
+    force_apt_get: true
+    cache_valid_time: 3600
+  register: _progress_status
+  until: _progress_status is succeeded
+  delay: 5
+  retries: 5
+  changed_when: false
+
+- name: Install required list of packages
+  package:
+    state: present
+    name:
+      - iptables
+      - iptables-persistent
+      - netfilter-persistent
+  register: _progress_status
+  until: _progress_status is succeeded
+  delay: 5
+  retries: 5
+
+- name: Remove ufw package
+  package:
+    state: absent
+    name: "ufw"
+  register: _progress_status
+  until: _progress_status is succeeded
+  delay: 5
+  retries: 5
+
+- name: Enable persistent service
+  systemd:
+    name: "netfilter-persistent"
+    state: started
+    enabled: true

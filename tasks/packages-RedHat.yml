@@ -1,0 +1,39 @@
+---
+- name: Ensure yum cache are updated
+  yum:
+    update_cache: true
+  changed_when: false
+
+- name: Install epel package
+  yum:
+    state: present
+    name: epel-release
+  register: _progress_status
+  delay: 5
+  retries: 5
+  until: _progress_status is successful
+
+- name: Install required list of packages
+  package:
+    state: present
+    name:
+      - iptables
+      - iptables-services
+  register: _progress_status
+  until: _progress_status is succeeded
+  delay: 5
+  retries: 5
+
+- name: Disable firewalld
+  systemd:
+    name: firewalld
+    state: stopped
+    masked: true
+    enabled: false
+  ignore_errors: true
+
+- name: Enable persistent service
+  systemd:
+    name: "iptables"
+    state: started
+    enabled: true

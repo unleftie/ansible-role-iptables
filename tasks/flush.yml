@@ -1,0 +1,55 @@
+---
+- name: Flush all rules and policies
+  notify: save_iptables_rules
+  block:
+    - name: Set the policy for the all chains in table filter to ACCEPT
+      iptables:
+        ip_version: "{{ item.ip_version }}"
+        chain: "{{ item.chain }}"
+        policy: ACCEPT
+        table: filter
+      loop:
+        - { chain: "INPUT", ip_version: "ipv4" }
+        - { chain: "OUTPUT", ip_version: "ipv4" }
+        - { chain: "FORWARD", ip_version: "ipv4" }
+        - { chain: "INPUT", ip_version: "ipv6" }
+        - { chain: "OUTPUT", ip_version: "ipv6" }
+        - { chain: "FORWARD", ip_version: "ipv6" }
+
+    - name: Set the policy for the all chains in table nat to ACCEPT
+      iptables:
+        ip_version: "{{ item.ip_version }}"
+        chain: "{{ item.chain }}"
+        policy: ACCEPT
+        table: nat
+      loop:
+        - { chain: "PREROUTING", ip_version: "ipv4" }
+        - { chain: "POSTROUTING", ip_version: "ipv4" }
+        - { chain: "PREROUTING", ip_version: "ipv6" }
+        - { chain: "POSTROUTING", ip_version: "ipv6" }
+
+    - name: Flush rules in table filter
+      iptables:
+        ip_version: "{{ item.ip_version }}"
+        chain: "{{ item.chain }}"
+        flush: true
+        table: filter
+      loop:
+        - { chain: "INPUT", ip_version: "ipv4" }
+        - { chain: "OUTPUT", ip_version: "ipv4" }
+        - { chain: "FORWARD", ip_version: "ipv4" }
+        - { chain: "INPUT", ip_version: "ipv6" }
+        - { chain: "OUTPUT", ip_version: "ipv6" }
+        - { chain: "FORWARD", ip_version: "ipv6" }
+
+    - name: Flush rules in table nat
+      iptables:
+        ip_version: "{{ item.ip_version }}"
+        chain: "{{ item.chain }}"
+        flush: true
+        table: nat
+      loop:
+        - { chain: "PREROUTING", ip_version: "ipv4" }
+        - { chain: "POSTROUTING", ip_version: "ipv4" }
+        - { chain: "PREROUTING", ip_version: "ipv6" }
+        - { chain: "POSTROUTING", ip_version: "ipv6" }
