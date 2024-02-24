@@ -103,7 +103,6 @@ jobs:
       matrix:
         distro:
           - debian12
-          - rockylinux9
 
     steps:
       - name: Harden Runner
