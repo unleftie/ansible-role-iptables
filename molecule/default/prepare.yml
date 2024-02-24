@@ -1,0 +1,43 @@
+---
+- name: Prepare
+  hosts: all
+  become: true
+  tasks:
+    - name: Wait for automatic system updates
+      shell: while fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 1; done;
+      changed_when: false
+
+    - name: Ensure apt cache are updated
+      apt:
+        update_cache: true
+        update_cache_retries: 5
+        update_cache_retry_max_delay: 5
+      register: _progress_status
+      until: _progress_status is succeeded
+      delay: 5
+      retries: 5
+      when: ansible_os_family == "Debian"
+
+    - name: Ensure unnecessary dependencies are removed
+      package:
+        name: curl-minimal
+        state: absent
+      register: _progress_status
+      until: _progress_status is succeeded
+      delay: 5
+      retries: 5
+
+    - name: Ensure required dependencies are present
+      package:
+        name: openssh-server
+        state: present
+      register: _progress_status
+      until: _progress_status is succeeded
+      delay: 5
+      retries: 5
+
+    - name: Ensure required services are in the right state
+      systemd:
+        name: "{{ item }}"
+        state: started
+      loop: ["sshd"]
