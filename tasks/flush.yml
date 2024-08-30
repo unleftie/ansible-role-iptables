@@ -1,6 +1,10 @@
 ---
 - name: Flush all rules and policies
-  notify: save_iptables_rules
+  notify:
+    - save_iptables_rules_redhat_ipv4
+    - save_iptables_rules_debian_ipv4
+    - save_iptables_rules_redhat_ipv6
+    - save_iptables_rules_debian_ipv6
   block:
     - name: Set the policy for the all chains in table filter to ACCEPT
       iptables:
