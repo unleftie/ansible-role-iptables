@@ -126,7 +126,6 @@ jobs:
     name: Publish Release
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    timeout-minutes: 5
     if: |
       inputs.publishRelease == true ||
       github.event_name == 'push' ||
