@@ -41,3 +41,17 @@
         name: "{{ item }}"
         state: started
       loop: ["sshd"]
+
+    - name: Generate authorized_keys file containing test key
+      community.crypto.openssh_keypair:
+        path: "/root/.ssh/test_key"
+        type: "ed25519"
+        owner: "root"
+        group: "root"
+        mode: "0600"
+        state: present
+
+    - name: Move test_key.pub to authorized_keys
+      command: mv /root/.ssh/test_key.pub /root/.ssh/authorized_keys
+      args:
+        creates: /root/.ssh/authorized_keys
