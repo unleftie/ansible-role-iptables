@@ -2,22 +2,16 @@
 dependencies: []
 
 galaxy_info:
-  role_name: linux
+  role_name: iptables
   author: unleftie
   description: Role for iptables setup
   company: ""
   license: "license (MIT)"
-  min_ansible_version: "2.10"
+  min_ansible_version: "2.14"
   platforms:
-    - name: Debian
-      versions:
-        - bookworm
     - name: Ubuntu
       versions:
-        - jammy
-    - name: EL
-      versions:
-        - "9"
+        - resolute
   galaxy_tags:
     - network
     - linux

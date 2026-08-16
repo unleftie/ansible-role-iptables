@@ -7,7 +7,7 @@
 
 | Platform | Version |
 | -------- | ------- |
-| debian   | 12      |
+| ubuntu   | 26.04   |
 
 ## Dependencies
 
@@ -20,18 +20,18 @@
 ```sh
 git clone https://github.com/unleftie/ansible-role-iptables.git
 cd ansible-role-iptables/
+ansible-galaxy install -r requirements.yml
 molecule test
 ```
 
 ## Installation
 
-> Upgradability notice: When upgrading from old version of this role, be aware that some files may be lost.
-
-```yml
-- name: Sample 1
-  hosts: all
-  become: true
-  tasks:
-    - include_role:
-        name: "ansible-role-iptables"
+```sh
+ansible-galaxy install -r requirements.yml
 ```
+
+Example [playbook](main.yml)
+
+## 📝 License
+
+This project is licensed under the [MIT](LICENSE).
