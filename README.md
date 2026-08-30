@@ -32,6 +32,11 @@ ansible-galaxy install -r requirements.yml
 
 Example [playbook](main.yml)
 
+## Documentation
+
+- [NAT rules](docs/nat.md)
+- [Compatibility with Docker](docs/docker-compatibility.md)
+
 ## 📝 License
 
 This project is licensed under the [MIT](LICENSE).
