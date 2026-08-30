@@ -16,7 +16,7 @@
       until: _progress_status is succeeded
       delay: 5
       retries: 5
-      when: ansible_os_family == "Debian"
+      when: ansible_facts['os_family'] == "Debian"
 
     - name: Ensure unnecessary dependencies are removed
       package:

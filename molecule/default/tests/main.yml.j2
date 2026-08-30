@@ -1,9 +1,9 @@
 ---
 service:
-{% if ansible_os_family == "RedHat" %}
+{% if ansible_facts['os_family'] == "RedHat" %}
   iptables:
 {% endif %}
-{% if ansible_os_family == "Debian" %}
+{% if ansible_facts['os_family'] == "Debian" %}
   netfilter-persistent:
 {% endif %}
     enabled: true
@@ -16,7 +16,7 @@ command:
     exit-status: 0
     exec: "ip6tables -nL"
 file:
-{% if ansible_os_family == "RedHat" %}
+{% if ansible_facts['os_family'] == "RedHat" %}
   /etc/sysconfig/iptables:
     exists: true
     filetype: file
@@ -24,7 +24,7 @@ file:
     exists: true
     filetype: file
 {% endif %}
-{% if ansible_os_family == "Debian" %}
+{% if ansible_facts['os_family'] == "Debian" %}
   /etc/iptables/rules.v4:
     exists: true
     filetype: file

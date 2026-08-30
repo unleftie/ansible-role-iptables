@@ -172,23 +172,23 @@
         ip_version: "ipv4"
         chain: POSTROUTING
         table: nat
-        out_interface: "{{ ansible_default_ipv4.interface }}"
+        out_interface: "{{ ansible_facts['default_ipv4']['interface'] }}"
         state: present
         jump: MASQUERADE
         comment: "default nat"
       when:
         - iptables_ipv4_nat | bool
-        - ansible_default_ipv4.interface is defined
+        - ansible_facts['default_ipv4']['interface'] is defined
 
     - name: Allow NAT (ipv6)
       iptables:
         ip_version: "ipv6"
         chain: POSTROUTING
         table: nat
-        out_interface: "{{ ansible_default_ipv6.interface }}"
+        out_interface: "{{ ansible_facts['default_ipv6']['interface'] }}"
         state: present
         jump: MASQUERADE
         comment: "default nat"
       when:
         - iptables_ipv6_nat | bool
-        - ansible_default_ipv6.interface is defined
+        - ansible_facts['default_ipv6']['interface'] is defined
