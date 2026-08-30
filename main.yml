@@ -27,4 +27,4 @@
   hosts: running_hosts
   become: true
   roles:
-    - ansible-role-hardening
+    - ansible-role-iptables
