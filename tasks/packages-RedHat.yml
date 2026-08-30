@@ -37,3 +37,9 @@
     name: "iptables"
     state: started
     enabled: true
+
+- name: Enable persistent ip6tables service
+  systemd:
+    name: "ip6tables"
+    state: started
+    enabled: true

@@ -57,3 +57,78 @@
         - { chain: "POSTROUTING", ip_version: "ipv4" }
         - { chain: "PREROUTING", ip_version: "ipv6" }
         - { chain: "POSTROUTING", ip_version: "ipv6" }
+
+    - name: Set the policy for the all chains in table mangle to ACCEPT
+      iptables:
+        ip_version: "{{ item.ip_version }}"
+        chain: "{{ item.chain }}"
+        policy: ACCEPT
+        table: mangle
+      loop:
+        - { chain: "PREROUTING", ip_version: "ipv4" }
+        - { chain: "INPUT", ip_version: "ipv4" }
+        - { chain: "FORWARD", ip_version: "ipv4" }
+        - { chain: "OUTPUT", ip_version: "ipv4" }
+        - { chain: "POSTROUTING", ip_version: "ipv4" }
+        - { chain: "PREROUTING", ip_version: "ipv6" }
+        - { chain: "INPUT", ip_version: "ipv6" }
+        - { chain: "FORWARD", ip_version: "ipv6" }
+        - { chain: "OUTPUT", ip_version: "ipv6" }
+        - { chain: "POSTROUTING", ip_version: "ipv6" }
+
+    - name: Flush rules in table mangle
+      iptables:
+        ip_version: "{{ item.ip_version }}"
+        chain: "{{ item.chain }}"
+        flush: true
+        table: mangle
+      loop:
+        - { chain: "PREROUTING", ip_version: "ipv4" }
+        - { chain: "INPUT", ip_version: "ipv4" }
+        - { chain: "FORWARD", ip_version: "ipv4" }
+        - { chain: "OUTPUT", ip_version: "ipv4" }
+        - { chain: "POSTROUTING", ip_version: "ipv4" }
+        - { chain: "PREROUTING", ip_version: "ipv6" }
+        - { chain: "INPUT", ip_version: "ipv6" }
+        - { chain: "FORWARD", ip_version: "ipv6" }
+        - { chain: "OUTPUT", ip_version: "ipv6" }
+        - { chain: "POSTROUTING", ip_version: "ipv6" }
+
+    - name: Set the policy for the all chains in table raw to ACCEPT
+      iptables:
+        ip_version: "{{ item.ip_version }}"
+        chain: "{{ item.chain }}"
+        policy: ACCEPT
+        table: raw
+      loop:
+        - { chain: "PREROUTING", ip_version: "ipv4" }
+        - { chain: "OUTPUT", ip_version: "ipv4" }
+        - { chain: "PREROUTING", ip_version: "ipv6" }
+        - { chain: "OUTPUT", ip_version: "ipv6" }
+
+    - name: Flush rules in table raw
+      iptables:
+        ip_version: "{{ item.ip_version }}"
+        chain: "{{ item.chain }}"
+        flush: true
+        table: raw
+      loop:
+        - { chain: "PREROUTING", ip_version: "ipv4" }
+        - { chain: "OUTPUT", ip_version: "ipv4" }
+        - { chain: "PREROUTING", ip_version: "ipv6" }
+        - { chain: "OUTPUT", ip_version: "ipv6" }
+
+    # -X removes unused custom chains left behind by other tools (e.g. docker, fail2ban)
+    - name: Delete unused custom chains in all tables
+      ansible.builtin.command: "{{ item.bin }} -t {{ item.table }} -X"
+      loop:
+        - { bin: "iptables", table: "filter" }
+        - { bin: "iptables", table: "nat" }
+        - { bin: "iptables", table: "mangle" }
+        - { bin: "iptables", table: "raw" }
+        - { bin: "ip6tables", table: "filter" }
+        - { bin: "ip6tables", table: "nat" }
+        - { bin: "ip6tables", table: "mangle" }
+        - { bin: "ip6tables", table: "raw" }
+      changed_when: false
+      failed_when: false

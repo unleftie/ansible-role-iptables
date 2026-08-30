@@ -12,6 +12,8 @@
         chain: INPUT
         in_interface: lo
         state: present
+        action: insert
+        rule_num: 1
         jump: ACCEPT
         comment: "loopback interface"
       loop: ["ipv4", "ipv6"]
@@ -22,6 +24,8 @@
         chain: OUTPUT
         out_interface: lo
         state: present
+        action: insert
+        rule_num: 1
         jump: ACCEPT
         comment: "loopback interface"
       loop: ["ipv4", "ipv6"]
@@ -32,6 +36,8 @@
         ip_version: "{{ item.ip_version }}"
         chain: "{{ item.chain }}"
         state: present
+        action: insert
+        rule_num: 2
         ctstate: ESTABLISHED,RELATED
         jump: ACCEPT
         comment: "established and related state"
@@ -46,6 +52,8 @@
         ip_version: "{{ item }}"
         chain: INPUT
         state: present
+        action: insert
+        rule_num: 3
         ctstate: INVALID
         jump: DROP
         comment: "invalid state"
@@ -86,7 +94,7 @@
         icmp_type: "{{ item }}"
         jump: ACCEPT
         comment: "icmp type {{ item }}"
-      loop: [3, 8, 11, 12, 13]
+      loop: [3, 8, 11]
 
     - name: Allow icmp from external (ipv6)
       iptables:
@@ -94,8 +102,10 @@
         chain: INPUT
         state: present
         protocol: icmpv6
+        icmp_type: "{{ item }}"
         jump: ACCEPT
-        comment: "icmpv6"
+        comment: "icmpv6 type {{ item }}"
+      loop: [1, 2, 3, 4, 128, 129, 133, 134, 135, 136]
 
     - name: Allow ssh from all
       iptables:
@@ -104,10 +114,58 @@
         protocol: tcp
         destination_port: "{{ iptables_ssh_port }}"
         state: present
+        action: insert
+        rule_num: 4
         ctstate: NEW,ESTABLISHED
         jump: ACCEPT
         comment: "ssh from external"
       loop: ["ipv4", "ipv6"]
+
+    - name: Allow forwarding of established and related connections (ipv4)
+      iptables:
+        ip_version: "ipv4"
+        chain: FORWARD
+        state: present
+        action: insert
+        rule_num: 1
+        ctstate: ESTABLISHED,RELATED
+        jump: ACCEPT
+        comment: "established and related state"
+      when: iptables_ipv4_nat | bool
+
+    - name: Allow forwarding of new connections for NAT (ipv4)
+      iptables:
+        ip_version: "ipv4"
+        chain: FORWARD
+        state: present
+        source: "{{ iptables_ipv4_nat_source_pool }}"
+        ctstate: NEW
+        jump: ACCEPT
+        comment: "forward new connections for nat"
+      when: iptables_ipv4_nat | bool
+
+    - name: Allow forwarding of established and related connections (ipv6)
+      iptables:
+        ip_version: "ipv6"
+        chain: FORWARD
+        state: present
+        action: insert
+        rule_num: 1
+        ctstate: ESTABLISHED,RELATED
+        jump: ACCEPT
+        comment: "established and related state"
+      when: iptables_ipv6_nat | bool
+
+    - name: Allow forwarding of new connections for NAT (ipv6)
+      iptables:
+        ip_version: "ipv6"
+        chain: FORWARD
+        state: present
+        source: "{{ iptables_ipv6_nat_source_pool }}"
+        ctstate: NEW
+        jump: ACCEPT
+        comment: "forward new connections for nat"
+      when: iptables_ipv6_nat | bool
 
     - name: Allow NAT (ipv4)
       iptables:
@@ -118,7 +176,9 @@
         state: present
         jump: MASQUERADE
         comment: "default nat"
-      when: iptables_ipv4_nat | bool
+      when:
+        - iptables_ipv4_nat | bool
+        - ansible_default_ipv4.interface is defined
 
     - name: Allow NAT (ipv6)
       iptables:
@@ -129,4 +189,6 @@
         state: present
         jump: MASQUERADE
         comment: "default nat"
-      when: iptables_ipv6_nat | bool
+      when:
+        - iptables_ipv6_nat | bool
+        - ansible_default_ipv6.interface is defined

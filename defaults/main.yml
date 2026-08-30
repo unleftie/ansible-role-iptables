@@ -10,11 +10,18 @@ iptables_forward_policy_drop: true
 iptables_ssh_port: 22
 
 # ipv4
-iptables_ipv4_nat: true
+iptables_ipv4_nat: false
+iptables_ipv4_nat_source_pool: "{{ iptables_internal_ip_pool }}"
 
 # ipv6
 iptables_ipv6_nat: false
+iptables_ipv6_nat_source_pool: "::/0"
 
-# internal network (hetzner cloud networks are ipv4-only)
+# internal network
 iptables_allow_internal: false
 iptables_internal_ip_pool: "10.0.0.0/16"
+
+# roll back to the previous ruleset if applying the new one breaks ssh access
+iptables_rollback_enabled: true
+iptables_rollback_timeout: 15
+iptables_rollback_backup_path: "/tmp/iptables-rollback.state"

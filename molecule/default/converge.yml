@@ -2,8 +2,10 @@
 - name: Converge
   hosts: all
   become: true
+  vars:
+    # molecule instances have no real routable ssh port to verify against
+    iptables_rollback_enabled: false
   tasks:
     - name: Include the role
       include_role:
         name: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | basename }}"
-

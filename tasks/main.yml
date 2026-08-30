@@ -12,6 +12,39 @@
 - include_tasks: flush.yml
   when: iptables_flush | bool
 
-- include_tasks: rules.yml
+- name: Apply rules and policies with automatic rollback on lockout
+  block:
+    - name: Save current firewall state for rollback
+      community.general.iptables_state:
+        ip_version: "{{ item }}"
+        state: saved
+        path: "{{ iptables_rollback_backup_path }}.{{ item }}"
+      loop: ["ipv4", "ipv6"]
 
-- include_tasks: policies.yml
+    - include_tasks: rules.yml
+
+    - include_tasks: policies.yml
+
+    - name: Verify ssh is still reachable after applying rules
+      wait_for:
+        host: "{{ ansible_host | default(inventory_hostname) }}"
+        port: "{{ iptables_ssh_port }}"
+        timeout: "{{ iptables_rollback_timeout }}"
+      delegate_to: localhost
+      become: false
+      when: iptables_rollback_enabled | bool
+
+    # only persist rules to disk once we know ssh access survived them
+    - meta: flush_handlers
+
+  rescue:
+    - name: Restore previous firewall state after a failed rollout
+      community.general.iptables_state:
+        ip_version: "{{ item }}"
+        state: restored
+        path: "{{ iptables_rollback_backup_path }}.{{ item }}"
+      loop: ["ipv4", "ipv6"]
+
+    - name: Fail after restoring the previous firewall state
+      fail:
+        msg: "Firewall rules failed to apply safely; the previous state has been restored."
