@@ -66,29 +66,16 @@
         - { source_port: 547, destination_port: 546, ip_version: "ipv6" }
       when: iptables_dhcp_client_allow | bool
 
-    - name: Allow all internal connections (ipv4)
+    - name: Allow internal network communication
       iptables:
         ip_version: "ipv4"
         chain: INPUT
         state: present
-        source: "{{ iptables_ipv4_internal_ip_pool }}"
-        destination: "{{ iptables_ipv4_internal_ip_pool }}"
+        source: "{{ iptables_internal_ip_pool }}"
         protocol: "all"
         jump: ACCEPT
-        comment: "all internal connections"
-      when: iptables_ipv4_allow_internal | bool
-
-    - name: Allow all internal connections (ipv6)
-      iptables:
-        ip_version: "ipv6"
-        chain: INPUT
-        state: present
-        source: "{{ iptables_ipv6_internal_ip_pool }}"
-        destination: "{{ iptables_ipv6_internal_ip_pool }}"
-        protocol: "all"
-        jump: ACCEPT
-        comment: "all internal connections"
-      when: iptables_ipv6_allow_internal | bool
+        comment: "internal network communication"
+      when: iptables_allow_internal | bool
 
     - name: Allow icmp from external (ipv4)
       iptables:
