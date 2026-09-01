@@ -22,7 +22,7 @@ provisioner:
   lint:
     name: ansible-lint
   env:
-    ANSIBLE_ROLES_PATH: "../../:../../../:${ANSIBLE_ROLES_PATH}"
+    ANSIBLE_ROLES_PATH: "../../:../../../:~/.ansible/roles:${ANSIBLE_ROLES_PATH}"
 scenario:
   test_sequence:
     - cleanup
