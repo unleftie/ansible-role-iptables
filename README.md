@@ -36,6 +36,7 @@ Example [playbook](main.yml)
 
 - [NAT rules](docs/nat.md)
 - [Compatibility with Docker](docs/docker-compatibility.md)
+- [Molecule tests](docs/molecule-testing.md)
 
 ## 📝 License
 
